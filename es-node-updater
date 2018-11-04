@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#Simple script to make the upgrade process of nodes simpler. Rather than running commands individually, scripted to run all commands on single node.
+#Stop running service of elasticsearch
+
+if (( $(ps -ef | grep -v grep | grep elasticsearch | wc -l) > 0 ))
+then
+systemctl stop elasticsearch
+echo "Stopping elasticsearch"
+else
+echo "elasticsearch is still running" && exit 0
+fi
+#Remove current plugins to install newer version from chef-client
+cd /usr/share/elasticsearch
+bin/elasticsearch-plugin remove x-pack
+bin/elasticsearch-plugin remove discovery-ec2
+bin/elasticsearch-plugin remove repository-s3
+chef-client
+##should join with 5.4.3 and security enabled, service will start at end of run

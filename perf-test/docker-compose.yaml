@@ -1,0 +1,7 @@
+flask_k8_test_app:
+  build: .
+  container_name: flask_k8_test_app
+  ports:
+    - "7575:7575"
+  volumes:
+    - .:/app
