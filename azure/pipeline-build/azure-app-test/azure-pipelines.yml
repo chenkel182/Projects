@@ -1,0 +1,32 @@
+# Build ASP.NET Core project using Azure Pipelines
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core?view=vsts
+queue:
+  name: Hosted VS2017
+  demands: 
+  - msbuild
+  - visualstudio
+  - vstest
+  timeoutInMinutes: 60
+trigger:
+  branches:
+    include: ["master", "feature/*"]
+pool:
+  vmImage: 'Ubuntu 16.04'
+  
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: |
+    dotnet build --configuration $(buildConfiguration)
+    dotnet test dotnetcore-tests --configuration $(buildConfiguration) --logger trx
+    dotnet publish --configuration $(buildConfiguration) --output $BUILD_ARTIFACTSTAGINGDIRECTORY
+  failOnStderr: true
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+
+- task: PublishBuildArtifacts@1
